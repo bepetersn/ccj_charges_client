@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    {% block head %}
+    {# Top level head block. Override this if you need complete of the page head #}
+    {# If you only want to override the styles, title, or charset, there are #}
+    {# blocks just for those elements #}
+    {# There is a charset block because in the future it might not be the best option #}
+    <meta charset="{% block charset %}utf-8{% endblock charset %}"> 
+    {# The title block let's you customize it on a page basis #}
+    <title>{% block title %}{% endblock title %}</title>
+    
+    {% block styles %}
+    {# All the styles for this page, overide this if you want custom styles sheets #}
+    <link href="{{ url_for('static', filename='css/style.css') }}" />
+    {% endblock %}
+    {% endblock %}
+  </head>
+
+  <body>
+    {# The wrapper block is a base class for all of the page #}
+    <div class="{% block wrapper_class %}container{% endblock %}">
+      
+      {# The header is layed out before the content and footer blocks #}
+      <div class="{% block top_class %}top{% endblock %}">
+        {% block top %}
+
+        {% endblock top %}
+      </div>
+
+      {# This should hold the main, mutable content #}
+      <div class="{% block content_class %}content{% endblock %}">
+        {% block content %} 
+      
+        {% endblock %}
+      </div>
+ 
+      {# The footer block should hold well the footer #}
+      <div class="{% block footer_class %}footer{% endblock %}">
+        {% block footer %}
+
+        {% endblock %}
+      </div>
+      
+    </div>
+    {% block scripts %} {% endblock %}
+  </body>
+</html>
