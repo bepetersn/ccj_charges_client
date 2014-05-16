@@ -1,9 +1,8 @@
 from pysqlite2 import dbapi2 as sqlite3
-from pprint import pprint
-import re
+import re, json
 
 
-def read_charges(sqlite_db='charges.db'):
+def read_charges(sqlite_db='ccj'):
 
     """ 
         Assumes the SQL table 'chargeshistory' exists, with at least a 
@@ -16,16 +15,17 @@ def read_charges(sqlite_db='charges.db'):
     c = conn.cursor()
 
     # get the size of the table
-    c.execute('SELECT COUNT(*) FROM chargeshistory')
+    c.execute('SELECT COUNT(*) FROM countyapi_chargeshistory')
     for result in c:
         size = float(result[0])
 
-    c.execute("SELECT citation FROM chargeshistory;")
+    c.execute("SELECT charges_citation FROM countyapi_chargeshistory;")
 
     charges = []
 
     for row in c:
-        charges.append(row[0])
+        if row[0] is not None:
+            charges.append(row[0])
 
     return charges
 
@@ -76,23 +76,19 @@ def normalize(all_charges=None):
             total_fail += 1
             uniq_fail.add(charge) 
 
-    return uniq_charges, uniq_fail
+    return list(uniq_charges), list(uniq_fail)
 
 
-def write_migration(charges=None, sqlite_db='charges.db'):
+def write_migration(filename, charges=None, sqlite_db='ccj'):
 
-    """ Creates a sql file for inserting the data of the 'charges'
-        variable into a table. Assumes there is a 'statues' table in
-        the sqlite_db database. """
+    """ Serializes the normalized charges data in a json file with 
+        the supplied name. """
 
     if not charges:
         charges, _ = normalize()
 
-    with open('charge_migration.sql', 'w') as migration_file:
-
-        query_str = "INSERT INTO statutes VALUES ('{0}');\n"
-        for c in charges:
-            migration_file.write(query_str.format(c))
+    with open(filename, 'w') as migration_file:
+        json.dump(charges, migration_file, indent=0)
 
     print "{0} citations added to the migration".format(len(charges))
 
